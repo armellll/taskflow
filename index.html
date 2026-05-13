@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow — The task manager for busy people. Capture, prioritize, and finish what matters.">
+  <title>TaskFlow — Do Less, Achieve More</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Landing-only styles ── */
+    .hero {
+      padding: 5.5rem 2.5rem 4rem;
+      max-width: 860px; margin: 0 auto;
+      text-align: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-lt); color: var(--accent);
+      border: 1px solid #b8e0c8;
+      padding: 0.35rem 0.9rem; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .pulse {
+      width: 7px; height: 7px; background: var(--accent2);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 7vw, 4.2rem);
+      font-weight: 800; margin-bottom: 1.1rem;
+    }
+    .hero h1 em { color: var(--accent2); font-style: italic; }
+    .hero-sub {
+      font-size: 1.05rem; color: var(--ink2); font-weight: 300;
+      max-width: 520px; margin: 0 auto 2.25rem;
+    }
+    .hero-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .hero-note { font-size: 0.78rem; color: var(--ink3); margin-top: 0.75rem; }
+
+    /* Demo card */
+    .demo-wrap { max-width: 740px; margin: 0 auto 2rem; padding: 0 2.5rem; }
+    .demo-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.08);
+    }
+    .demo-titlebar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.25rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .wb { width: 11px; height: 11px; border-radius: 50%; }
+    .demo-titlebar span { font-size: 0.78rem; color: var(--ink3); margin-left: 6px; }
+    .demo-body { padding: 1.25rem; }
+    .demo-input-row {
+      display: flex; gap: 8px; margin-bottom: 1rem;
+    }
+    .demo-input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 0.6rem 1rem;
+      font-size: 0.875rem; outline: none; transition: border-color .15s;
+    }
+    .demo-input:focus { border-color: var(--accent2); }
+    .demo-add { background: var(--accent2); color: #fff; border: none; border-radius: var(--r); padding: 0.6rem 1.1rem; font-size: 0.85rem; font-weight: 500; }
+    .demo-task {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.7rem 0.85rem; background: var(--surface);
+      border-radius: 8px; margin-bottom: 6px; cursor: pointer;
+      transition: opacity .2s;
+    }
+    .demo-task.done { opacity: 0.45; }
+    .demo-task.done .demo-task-title { text-decoration: line-through; color: var(--ink3); }
+    .demo-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: #fff;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; color: #fff; transition: all .15s;
+    }
+    .demo-task.done .demo-check { background: var(--accent2); border-color: var(--accent2); }
+    .demo-task-title { flex: 1; font-size: 0.875rem; }
+
+    /* Stats */
+    .stats-band {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      max-width: 740px; margin: 0 auto 4rem;
+      padding: 0 2.5rem;
+      gap: 12px;
+    }
+    .stat-tile {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 1.25rem; text-align: center;
+    }
+    .stat-tile .num {
+      font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+      line-height: 1; color: var(--ink);
+    }
+    .stat-tile .num em { color: var(--accent2); font-style: normal; }
+    .stat-tile .lbl { font-size: 0.78rem; color: var(--ink3); margin-top: 4px; }
+
+    /* Features */
+    .section { padding: 4rem 2.5rem; max-width: 860px; margin: 0 auto; }
+    .section-eyebrow {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--ink3); margin-bottom: 0.6rem;
+    }
+    .section h2 {
+      font-size: clamp(1.7rem, 4vw, 2.5rem);
+      font-weight: 800; margin-bottom: 2.5rem;
+    }
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .feat {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.4rem;
+      transition: box-shadow .2s;
+    }
+    .feat:hover { box-shadow: 0 4px 20px rgba(0,0,0,.07); }
+    .feat-icon {
+      width: 38px; height: 38px;
+      background: var(--accent-lt); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; margin-bottom: 0.9rem;
+    }
+    .feat h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .feat p  { font-size: 0.85rem; color: var(--ink2); line-height: 1.55; }
+
+    /* Pricing */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .plan {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.6rem; position: relative;
+    }
+    .plan.pop { border: 2px solid var(--accent2); }
+    .pop-label {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--accent2); color: #fff;
+      font-size: 0.68rem; font-weight: 700;
+      padding: 0.22rem 0.8rem; border-radius: 999px; white-space: nowrap;
+    }
+    .plan-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .plan-price {
+      font-family: 'Syne', sans-serif; font-size: 2.1rem; font-weight: 800;
+      line-height: 1; letter-spacing: -0.03em;
+    }
+    .plan-price sub { font-size: 0.85rem; font-weight: 400; color: var(--ink3); vertical-align: baseline; }
+    .plan-desc { font-size: 0.78rem; color: var(--ink3); margin: 0.4rem 0 1.1rem; }
+    .plan-feats { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 1.4rem; }
+    .plan-feats li { font-size: 0.85rem; color: var(--ink2); display: flex; gap: 7px; }
+    .plan-feats li::before { content: '✓'; color: var(--accent2); font-weight: 700; flex-shrink: 0; }
+    .plan-feats li.off { color: var(--ink3); }
+    .plan-feats li.off::before { content: '–'; color: var(--ink3); }
+    .plan-btn {
+      width: 100%; padding: 0.7rem; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500;
+      border: 1px solid var(--border); background: transparent; color: var(--ink);
+      transition: all .15s; cursor: pointer;
+    }
+    .plan-btn:hover { background: var(--surface); }
+    .plan.pop .plan-btn { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+    .plan.pop .plan-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+    /* CTA banner */
+    .cta-band {
+      margin: 2rem 2.5rem 4rem;
+      max-width: 800px; margin-left: auto; margin-right: auto;
+      background: var(--ink); border-radius: 16px;
+      padding: 3rem 2.5rem; text-align: center;
+    }
+    .cta-band h2 { color: #fff; font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: 0.7rem; }
+    .cta-band p  { color: rgba(255,255,255,.55); font-size: 0.95rem; margin-bottom: 1.75rem; }
+    .cta-band .btn-primary { background: #fff; color: var(--ink); border-color: #fff; }
+    .cta-band .btn-primary:hover { background: var(--accent-lt); border-color: var(--accent-lt); color: var(--accent); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.8rem; color: var(--ink3);
+      flex-wrap: wrap; gap: 8px;
+    }
+    footer strong { font-family: 'Syne', sans-serif; color: var(--ink); }
+
+    hr.sep { border: none; border-top: 1px solid var(--border); max-width: 800px; margin: 0 auto 3rem; }
+
+    @media (max-width: 600px) {
+      .stats-band { grid-template-columns: repeat(2,1fr); }
+      .hero { padding: 3.5rem 1.25rem 2.5rem; }
+      .demo-wrap, .section, .cta-band { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .stats-band { padding: 0 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">Task<span>Flow</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="login.html">Sign in</a>
+  </div>
+  <a href="signup.html" class="btn btn-primary btn-sm">Start free →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag"><span class="pulse"></span> Free during early access</div>
+  <h1>Stop drowning.<br>Start <em>doing</em>.</h1>
+  <p class="hero-sub">TaskFlow helps busy people capture, prioritize, and actually finish what matters — in under 60 seconds a day.</p>
+  <div class="hero-btns">
+    <a href="signup.html" class="btn btn-primary btn-lg">Get started free →</a>
+    <a href="#features" class="btn btn-outline btn-lg">See how it works</a>
+  </div>
+  <p class="hero-note">No credit card required. Free plan available forever.</p>
+</section>
+
+<!-- LIVE DEMO -->
+<div class="demo-wrap">
+  <div class="demo-card">
+    <div class="demo-titlebar">
+      <div class="wb" style="background:#ff5f57"></div>
+      <div class="wb" style="background:#febc2e"></div>
+      <div class="wb" style="background:#28c840"></div>
+      <span>TaskFlow — Today's focus</span>
+    </div>
+    <div class="demo-body">
+      <div class="demo-input-row">
+        <input class="demo-input" id="demoInput" type="text" placeholder="Add a task and press Enter…" maxlength="80">
+        <button class="demo-add" id="demoAdd">+ Add</button>
+      </div>
+      <div id="demoTasks">
+        <div class="demo-task done"><div class="demo-check">✓</div><span class="demo-task-title">Review Q3 marketing report</span><span class="badge badge-high">High</span></div>
+        <div class="demo-task"><div class="demo-check"></div><span class="demo-task-title">Reply to client proposal</span><span class="badge badge-high">High</span></div>
+        <div class="demo-task"><div class="demo-check"></div><span class="demo-task-title">Schedule team standup</span><span class="badge badge-medium">Medium</span></div>
+        <div class="demo-task"><div class="demo-check"></div><span class="demo-task-title">Buy groceries after work</span><span class="badge badge-low">Low</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAND -->
+<div class="stats-band">
+  <div class="stat-tile"><div class="num">2<em>min</em></div><div class="lbl">avg daily setup time</div></div>
+  <div class="stat-tile"><div class="num">3<em>×</em></div><div class="lbl">more tasks completed</div></div>
+  <div class="stat-tile"><div class="num">$0</div><div class="lbl">to get started today</div></div>
+</div>
+
+<hr class="sep">
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-eyebrow">Why TaskFlow</div>
+  <h2>Built for people with<br>too much to do.</h2>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-icon">⚡</div><h3>Quick capture</h3><p>Add tasks in seconds from anywhere — no friction, no forms. Just type and move on.</p></div>
+    <div class="feat"><div class="feat-icon">🎯</div><h3>Smart priorities</h3><p>Surfaces your most important work each morning so you never miss what matters.</p></div>
+    <div class="feat"><div class="feat-icon">🔔</div><h3>Gentle reminders</h3><p>Smart nudges at the right time — not spammy alerts. Stay on track without the noise.</p></div>
+    <div class="feat"><div class="feat-icon">🔁</div><h3>Recurring tasks</h3><p>Daily, weekly, or monthly tasks auto-appear when you need them. Set it and forget it.</p></div>
+    <div class="feat"><div class="feat-icon">📱</div><h3>Works everywhere</h3><p>Browser, mobile, desktop — your tasks follow you. No installs required to start.</p></div>
+    <div class="feat"><div class="feat-icon">📊</div><h3>Weekly insights</h3><p>See what you finished, what slipped, and how to improve — in a 30-second digest.</p></div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-eyebrow">Pricing</div>
+  <h2>Start free. Upgrade<br>when you're ready.</h2>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0</div>
+      <div class="plan-desc">For individuals just starting out</div>
+      <ul class="plan-feats">
+        <li>Up to 10 active tasks</li>
+        <li>Basic priorities</li>
+        <li>Web access</li>
+        <li class="off">Reminders</li>
+        <li class="off">Recurring tasks</li>
+        <li class="off">Weekly insights</li>
+      </ul>
+      <a href="signup.html"><button class="plan-btn">Get started free</button></a>
+    </div>
+    <div class="plan pop">
+      <div class="pop-label">⭐ Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$4.99<sub>/mo</sub></div>
+      <div class="plan-desc">For busy people who mean business</div>
+      <ul class="plan-feats">
+        <li>Unlimited tasks</li>
+        <li>Smart priorities</li>
+        <li>Web + mobile access</li>
+        <li>Reminders &amp; alerts</li>
+        <li>Recurring tasks</li>
+        <li>Weekly insights</li>
+      </ul>
+      <a href="signup.html"><button class="plan-btn">Start 7-day free trial</button></a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Team</div>
+      <div class="plan-price">$12<sub>/mo</sub></div>
+      <div class="plan-desc">For small teams staying aligned</div>
+      <ul class="plan-feats">
+        <li>Everything in Pro</li>
+        <li>Shared task boards</li>
+        <li>Team digest emails</li>
+        <li>Admin controls</li>
+        <li>Up to 10 members</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="plan-btn" onclick="alert('Team plan coming soon! Email us.')">Contact us</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <h2>Your to-do list won't fix itself.</h2>
+  <p>Join early — free during beta. No credit card required.</p>
+  <a href="signup.html" class="btn btn-primary btn-lg">Create your free account →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>TaskFlow</strong>
+  <span>© 2025 · <a href="#">Privacy</a> · <a href="#">Terms</a> · Built on GitHub Pages</span>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+  // Live demo interactivity
+  const demoTasks = document.getElementById('demoTasks');
+  const demoInput = document.getElementById('demoInput');
+
+  demoTasks.addEventListener('click', e => {
+    const item = e.target.closest('.demo-task');
+    if (item) {
+      item.classList.toggle('done');
+      const check = item.querySelector('.demo-check');
+      check.textContent = item.classList.contains('done') ? '✓' : '';
+    }
+  });
+
+  function addDemoTask(text) {
+    if (!text.trim()) return;
+    const item = document.createElement('div');
+    item.className = 'demo-task';
+    item.innerHTML = `<div class="demo-check"></div><span class="demo-task-title">${text.trim()}</span><span class="badge badge-medium">Medium</span>`;
+    demoTasks.prepend(item);
+    demoInput.value = '';
+  }
+
+  document.getElementById('demoAdd').addEventListener('click', () => addDemoTask(demoInput.value));
+  demoInput.addEventListener('keydown', e => { if (e.key === 'Enter') addDemoTask(demoInput.value); });
+</script>
+</body>
+</html>

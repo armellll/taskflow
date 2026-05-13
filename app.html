@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — TaskFlow</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* App-specific extras */
+    .filter-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filter-btn {
+      padding: 0.35rem 0.85rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 500;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--ink2); cursor: pointer; transition: all .15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--ink); color: #fff; border-color: var(--ink);
+    }
+    .filter-btn.active-green { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+    .section-heading {
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 0.85rem; color: var(--ink3);
+      letter-spacing: .05em; text-transform: uppercase;
+      margin: 1.75rem 0 0.6rem;
+    }
+
+    .progress-bar {
+      height: 6px; background: var(--border); border-radius: 3px;
+      margin-bottom: 1.25rem; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--accent2); border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .upgrade-banner {
+      background: linear-gradient(135deg, #1a472a 0%, #2d7a4f 100%);
+      border-radius: var(--r-lg); padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.75rem; flex-wrap: wrap; gap: 12px;
+    }
+    .upgrade-banner p { color: rgba(255,255,255,.85); font-size: 0.875rem; }
+    .upgrade-banner strong { color: #fff; }
+    .upgrade-btn {
+      background: #fff; color: var(--accent); border: none;
+      border-radius: var(--r); padding: 0.55rem 1.1rem;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .upgrade-btn:hover { opacity: 0.85; }
+
+    .task-count-label {
+      font-size: 0.8rem; color: var(--ink3);
+      margin-bottom: 0.75rem;
+    }
+
+    .free-limit-note {
+      font-size: 0.78rem; color: var(--ink3);
+      display: flex; align-items: center; gap: 5px;
+      margin-top: 8px;
+    }
+
+    /* Sidebar user */
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.6rem 0.5rem; border-radius: var(--r);
+      margin-bottom: 0.5rem;
+    }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent-lt); color: var(--accent);
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-name  { font-size: 0.85rem; font-weight: 500; color: var(--ink); }
+    .user-plan  { font-size: 0.72rem; color: var(--ink3); }
+    .logout-btn {
+      width: 100%; text-align: left; padding: 0.55rem 0.75rem;
+      background: none; border: none; border-radius: var(--r);
+      font-size: 0.875rem; color: var(--ink3); transition: all .15s;
+    }
+    .logout-btn:hover { background: var(--danger-lt); color: var(--danger); }
+
+    /* Mobile header */
+    .mobile-header {
+      display: none; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: #fff; position: sticky; top: 0; z-index: 50;
+    }
+    .menu-btn { background: none; border: none; font-size: 1.2rem; color: var(--ink); }
+    @media (max-width: 768px) {
+      .mobile-header { display: flex; }
+      .app-shell { display: block; }
+    }
+
+    /* Date greeting */
+    .greeting { font-size: 0.85rem; color: var(--ink3); margin-bottom: 0.25rem; }
+  </style>
+</head>
+<body>
+
+<!-- Mobile header -->
+<div class="mobile-header">
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="nav-logo" style="font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-.04em;">Task<span style="color:var(--accent2)">Flow</span></div>
+  <div style="width:28px"></div>
+</div>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Task<span>Flow</span></div>
+
+    <div id="sidebarUser" class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div>
+        <div class="user-name" id="userName">Loading…</div>
+        <div class="user-plan">Free plan</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Menu</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link active" href="app.html"><span class="icon">📋</span> My Tasks</a>
+      <a class="sidebar-link" href="#" onclick="alert('Coming soon!')"><span class="icon">📅</span> Calendar</a>
+      <a class="sidebar-link" href="#" onclick="alert('Coming soon!')"><span class="icon">📊</span> Insights</a>
+      <a class="sidebar-link" href="#" onclick="alert('Coming soon! Upgrade to Pro.')"><span class="icon">🔁</span> Recurring <span class="badge badge-low" style="margin-left:4px;font-size:.65rem">Pro</span></a>
+    </nav>
+
+    <div class="sidebar-section-label">Account</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="#" onclick="alert('Settings coming soon!')"><span class="icon">⚙️</span> Settings</a>
+      <a class="sidebar-link" href="index.html#pricing"><span class="icon">⭐</span> Upgrade to Pro</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="logout-btn" id="logoutBtn">↩ Sign out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <p class="greeting" id="greeting">Good morning</p>
+      <h1 id="pageTitle">My Tasks</h1>
+      <p id="dateStr" style="font-size:.85rem;color:var(--ink3);margin-top:.15rem"></p>
+    </div>
+
+    <!-- Upgrade banner (shown on free plan when nearing limit) -->
+    <div class="upgrade-banner" id="upgradeBanner" style="display:none">
+      <p><strong>You're using 8 of 10 free tasks.</strong> Upgrade to Pro for unlimited tasks, reminders &amp; more.</p>
+      <button class="upgrade-btn" onclick="window.location.href='index.html#pricing'">Upgrade — $4.99/mo</button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total tasks</div></div>
+      <div class="stat-card"><div class="stat-num" id="statDone">0<span class="unit"> ✓</span></div><div class="stat-label">Completed today</div></div>
+      <div class="stat-card"><div class="stat-num" id="statHigh">0</div><div class="stat-label">High priority left</div></div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+    <!-- Quick add -->
+    <div class="quick-add">
+      <span style="font-size:1rem;color:var(--ink3)">+</span>
+      <input type="text" id="taskInput" placeholder="Add a task… (press Enter to save)" maxlength="120">
+      <select id="prioritySelect">
+        <option value="high">🔴 High</option>
+        <option value="medium" selected>🟡 Medium</option>
+        <option value="low">🟢 Low</option>
+      </select>
+      <input type="date" id="dueDateInput" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:.35rem .6rem;font-size:.8rem;outline:none;color:var(--ink2)">
+      <button class="btn btn-green btn-sm" id="addBtn">Add</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="active">Active</button>
+      <button class="filter-btn" data-filter="done">Completed</button>
+      <button class="filter-btn" data-filter="high">🔴 High</button>
+      <button class="filter-btn" data-filter="today">📅 Due today</button>
+    </div>
+
+    <!-- Free limit note -->
+    <div class="free-limit-note" id="limitNote" style="display:none">
+      <span>📦</span> <span id="limitText">0 / 10 tasks used on free plan.</span>
+    </div>
+
+    <!-- Task list -->
+    <div id="taskListContainer">
+      <div class="section-heading" id="taskSectionLabel">Your tasks</div>
+      <div id="taskList"></div>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">✅</div>
+        <p id="emptyMsg">Nothing here yet. Add your first task above!</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD/EDIT TASK MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Edit task</h2>
+      <button class="modal-close" onclick="Modal.close('editModal')">✕ Close</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label class="form-label">Task title</label>
+        <input class="form-input" type="text" id="editTitle" maxlength="120">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-input" id="editPriority">
+          <option value="high">🔴 High</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due date</label>
+        <input class="form-input" type="date" id="editDue">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="editNotes" rows="3" placeholder="Optional notes…" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="Modal.close('editModal')">Cancel</button>
+      <button class="btn btn-green" id="saveEditBtn">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  Auth.requireAuth();
+
+  const FREE_LIMIT = 10;
+  let currentFilter = 'all';
+
+  /* ── Greetings & date ── */
+  function initGreeting() {
+    const user = Auth.getUser();
+    const firstName = user?.name?.split(' ')[0] || 'there';
+    const hour = new Date().getHours();
+    const time = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greeting').textContent = `${time}, ${firstName} 👋`;
+    document.getElementById('pageTitle').textContent = 'My Tasks';
+    document.getElementById('dateStr').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    document.getElementById('userName').textContent = user?.name || user?.email || 'User';
+    document.getElementById('userAvatar').textContent = (user?.name || 'U').charAt(0).toUpperCase();
+  }
+
+  /* ── Render stats ── */
+  function renderStats() {
+    const s = TaskStore.getStats();
+    const todayDone = TaskStore.getAll().filter(t => t.done && t.doneAt?.startsWith(DateUtil.today())).length;
+    document.getElementById('statTotal').textContent = s.total;
+    document.getElementById('statDone').innerHTML = `${todayDone}<span class="unit"> ✓</span>`;
+    document.getElementById('statHigh').textContent = s.high;
+    const pct = s.total === 0 ? 0 : Math.round((s.done / s.total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    // Free limit note
+    const limitNote = document.getElementById('limitNote');
+    const limitText = document.getElementById('limitText');
+    const activeTasks = TaskStore.getAll().filter(t => !t.done).length;
+    if (activeTasks >= FREE_LIMIT * 0.7) {
+      limitNote.style.display = 'flex';
+      limitText.textContent = `${activeTasks} / ${FREE_LIMIT} tasks used on free plan.`;
+    }
+    if (activeTasks >= FREE_LIMIT - 2) {
+      document.getElementById('upgradeBanner').style.display = 'flex';
+    }
+  }
+
+  /* ── Render task list ── */
+  function renderTasks() {
+    const all = TaskStore.getAll();
+    const filtered = all.filter(t => {
+      if (currentFilter === 'active') return !t.done;
+      if (currentFilter === 'done')   return t.done;
+      if (currentFilter === 'high')   return t.priority === 'high' && !t.done;
+      if (currentFilter === 'today')  return t.dueDate === DateUtil.today() && !t.done;
+      return true;
+    });
+
+    const list = document.getElementById('taskList');
+    const empty = document.getElementById('emptyState');
+    const emptyMsg = document.getElementById('emptyMsg');
+
+    list.innerHTML = '';
+
+    if (filtered.length === 0) {
+      empty.style.display = '';
+      const msgs = { all: 'Nothing here yet. Add your first task above!', active: 'No active tasks — great job! 🎉', done: 'No completed tasks yet.', high: 'No high priority tasks!', today: 'Nothing due today.' };
+      emptyMsg.textContent = msgs[currentFilter] || msgs.all;
+      return;
+    }
+    empty.style.display = 'none';
+
+    filtered.forEach(task => {
+      const item = document.createElement('div');
+      item.className = `task-item${task.done ? ' done' : ''}`;
+      item.dataset.id = task.id;
+
+      const dueLabel = DateUtil.relative(task.dueDate);
+      const dueCls   = DateUtil.isPast(task.dueDate) && !task.done ? 'color:var(--danger)' : '';
+
+      item.innerHTML = `
+        <div class="task-check" data-action="toggle">${task.done ? '✓' : ''}</div>
+        <div class="task-title">${escHtml(task.title)}</div>
+        ${dueLabel ? `<span class="task-due" style="${dueCls}">${dueLabel}</span>` : ''}
+        <span class="badge ${Priority.class(task.priority)}">${Priority.label(task.priority)}</span>
+        <div class="task-actions">
+          <button data-action="edit" title="Edit">✏️</button>
+          <button class="del-btn" data-action="delete" title="Delete">🗑</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+
+    renderStats();
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Task actions ── */
+  document.getElementById('taskList').addEventListener('click', e => {
+    const action = e.target.closest('[data-action]')?.dataset.action;
+    const item   = e.target.closest('.task-item');
+    if (!item || !action) return;
+    const id = item.dataset.id;
+
+    if (action === 'toggle') {
+      TaskStore.toggle(id);
+      Toast.success(item.classList.contains('done') ? 'Task marked as active.' : 'Task completed! 🎉');
+      renderTasks();
+    }
+    if (action === 'delete') {
+      if (confirm('Delete this task?')) {
+        TaskStore.remove(id);
+        Toast.show('Task deleted.');
+        renderTasks();
+      }
+    }
+    if (action === 'edit') {
+      const task = TaskStore.getAll().find(t => t.id === id);
+      if (!task) return;
+      document.getElementById('editId').value    = task.id;
+      document.getElementById('editTitle').value = task.title;
+      document.getElementById('editPriority').value = task.priority;
+      document.getElementById('editDue').value   = task.dueDate || '';
+      document.getElementById('editNotes').value = task.notes  || '';
+      Modal.open('editModal');
+    }
+  });
+
+  /* ── Add task ── */
+  function addTask() {
+    const title    = document.getElementById('taskInput').value.trim();
+    const priority = document.getElementById('prioritySelect').value;
+    const dueDate  = document.getElementById('dueDateInput').value || null;
+    if (!title) { Toast.error('Please enter a task title.'); return; }
+
+    const activeTasks = TaskStore.getAll().filter(t => !t.done).length;
+    if (activeTasks >= FREE_LIMIT) {
+      Toast.error(`Free plan limit reached (${FREE_LIMIT} tasks). Upgrade to Pro!`);
+      return;
+    }
+
+    TaskStore.add({ title, priority, dueDate });
+    document.getElementById('taskInput').value = '';
+    document.getElementById('dueDateInput').value = '';
+    Toast.success('Task added!');
+    renderTasks();
+  }
+
+  document.getElementById('addBtn').addEventListener('click', addTask);
+  document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+  /* ── Save edit ── */
+  document.getElementById('saveEditBtn').addEventListener('click', () => {
+    const id    = document.getElementById('editId').value;
+    const title = document.getElementById('editTitle').value.trim();
+    if (!title) { Toast.error('Title cannot be empty.'); return; }
+    TaskStore.update(id, {
+      title,
+      priority: document.getElementById('editPriority').value,
+      dueDate:  document.getElementById('editDue').value || null,
+      notes:    document.getElementById('editNotes').value
+    });
+    Modal.close('editModal');
+    Toast.success('Task updated!');
+    renderTasks();
+  });
+
+  /* ── Filters ── */
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderTasks();
+    });
+  });
+
+  /* ── Mobile sidebar ── */
+  document.getElementById('menuBtn')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  Modal.closeOnOverlay('editModal');
+
+  /* ── Logout ── */
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm('Sign out of TaskFlow?')) Auth.logout();
+  });
+
+  /* ── Init ── */
+  initGreeting();
+  renderTasks();
+</script>
+</body>
+</html>
